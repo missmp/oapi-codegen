@@ -1,7 +1,7 @@
 
 
-// RegisterHandlers adds each server route to the EchoRouter.
-func RegisterHandlers(router interface {
+// {{.Tag}}RegisterHandlers adds each {{.Tag}} server route to the EchoRouter.
+func {{.Tag}}RegisterHandlers(router interface {
                              	CONNECT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
                              	DELETE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
                              	GET(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
@@ -11,12 +11,12 @@ func RegisterHandlers(router interface {
                              	POST(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
                              	PUT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
                              	TRACE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
-                             }, si ServerInterface) {
+                             }, si {{.Tag}}ServerInterface) {
 {{if .}}
-    wrapper := ServerInterfaceWrapper{
+    wrapper := {{.Tag}}ServerInterfaceWrapper{
         Handler: si,
     }
 {{end}}
-{{range .}}router.{{.Method}}("{{.Path | swaggerUriToEchoUri}}", wrapper.{{.OperationId}})
+{{range .Ops}}router.{{.Method}}("{{.Path | swaggerUriToEchoUri}}", wrapper.{{.OperationId}})
 {{end}}
 }

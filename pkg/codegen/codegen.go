@@ -115,6 +115,15 @@ func Generate(swagger *openapi3.Swagger, packageName string, opts Options) (stri
 		return "", errors.Wrap(err, "error creating operation definitions")
 	}
 
+	generationParams:= GenerationParams{
+		Ops:ops,
+	}
+
+	// Only use the first include tag for generate
+	if len(opts.IncludeTags)>0 {
+		generationParams.Tag=opts.IncludeTags[0]
+	}
+
 	var typeDefinitions string
 	if opts.GenerateTypes {
 		typeDefinitions, err = GenerateTypeDefinitions(t, swagger, ops)
@@ -123,9 +132,10 @@ func Generate(swagger *openapi3.Swagger, packageName string, opts Options) (stri
 		}
 	}
 
+
 	var echoServerOut string
 	if opts.GenerateEchoServer {
-		echoServerOut, err = GenerateEchoServer(t, ops)
+		echoServerOut, err = GenerateEchoServer(t, generationParams)
 		if err != nil {
 			return "", errors.Wrap(err, "error generating Go handlers for Paths")
 		}

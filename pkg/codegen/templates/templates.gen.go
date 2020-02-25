@@ -695,8 +695,8 @@ type {{.TypeName}} {{.Schema.TypeDecl}}
 `,
 	"register.tmpl": `
 
-// RegisterHandlers adds each server route to the EchoRouter.
-func RegisterHandlers(router interface {
+// {{.Tag}}RegisterHandlers adds each {{.Tag}} server route to the EchoRouter.
+func {{.Tag}}RegisterHandlers(router interface {
                              	CONNECT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
                              	DELETE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
                              	GET(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
@@ -706,13 +706,13 @@ func RegisterHandlers(router interface {
                              	POST(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
                              	PUT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
                              	TRACE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
-                             }, si ServerInterface) {
+                             }, si {{.Tag}}ServerInterface) {
 {{if .}}
-    wrapper := ServerInterfaceWrapper{
+    wrapper := {{.Tag}}ServerInterfaceWrapper{
         Handler: si,
     }
 {{end}}
-{{range .}}router.{{.Method}}("{{.Path | swaggerUriToEchoUri}}", wrapper.{{.OperationId}})
+{{range .Ops}}router.{{.Method}}("{{.Path | swaggerUriToEchoUri}}", wrapper.{{.OperationId}})
 {{end}}
 }
 `,
@@ -723,9 +723,9 @@ type {{$opid}}{{.NameTag}}RequestBody {{.TypeDef}}
 {{end}}
 {{end}}
 `,
-	"server-interface.tmpl": `// ServerInterface represents all server handlers.
-type ServerInterface interface {
-{{range .}}{{.SummaryAsComment }}
+	"server-interface.tmpl": `// {{.Tag}}ServerInterface represents all {{.Tag}} server handlers.
+type {{.Tag}}ServerInterface interface {
+{{range.Ops}}{{.SummaryAsComment }}
 // ({{.Method}} {{.Path}})
 {{.OperationId}}(ctx echo.Context{{genParamArgs .PathParams}}{{if .RequiresParamObject}}, params {{.OperationId}}Params{{end}}) error
 {{end}}
@@ -736,13 +736,13 @@ type ServerInterface interface {
 type {{.TypeName}} {{.Schema.TypeDecl}}
 {{end}}
 `,
-	"wrappers.tmpl": `// ServerInterfaceWrapper converts echo contexts to parameters.
-type ServerInterfaceWrapper struct {
-    Handler ServerInterface
+	"wrappers.tmpl": `// {{.Tag}}ServerInterfaceWrapper converts {{.Tag}} echo contexts to parameters.
+type {{.Tag}}ServerInterfaceWrapper struct {
+    Handler {{.Tag}}ServerInterface
 }
 
-{{range .}}{{$opid := .OperationId}}// {{$opid}} converts echo context to params.
-func (w *ServerInterfaceWrapper) {{.OperationId}} (ctx echo.Context) error {
+{{range .Ops}}{{$opid := .OperationId}}// {{$opid}} converts echo context to params.
+func (w *{{$.Tag}}ServerInterfaceWrapper) {{.OperationId}} (ctx echo.Context) error {
     var err error
 {{range .PathParams}}// ------------- Path parameter "{{.ParamName}}" -------------
     var {{$varName := .GoVariableName}}{{$varName}} {{.TypeDef}}

@@ -211,6 +211,12 @@ type OperationDefinition struct {
 	Spec                *openapi3.Operation
 }
 
+// GenerationParams describes params for generate tmpl file
+type GenerationParams struct {
+	Tag string
+	Ops []OperationDefinition
+}
+
 // Returns the list of all parameters except Path parameters. Path parameters
 // are handled differently from the rest, since they're mandatory.
 func (o *OperationDefinition) Params() []ParameterDefinition {
@@ -681,7 +687,7 @@ func GenerateChiServer(t *template.Template, operations []OperationDefinition) (
 
 // GenerateEchoServer This function generates all the go code for the ServerInterface as well as
 // all the wrapper functions around our handlers.
-func GenerateEchoServer(t *template.Template, operations []OperationDefinition) (string, error) {
+func GenerateEchoServer(t *template.Template, operations GenerationParams) (string, error) {
 	si, err := GenerateServerInterface(t, operations)
 	if err != nil {
 		return "", fmt.Errorf("Error generating server types and interface: %s", err)
@@ -700,7 +706,7 @@ func GenerateEchoServer(t *template.Template, operations []OperationDefinition) 
 }
 
 // Uses the template engine to generate the server interface
-func GenerateServerInterface(t *template.Template, ops []OperationDefinition) (string, error) {
+func GenerateServerInterface(t *template.Template, ops GenerationParams) (string, error) {
 	var buf bytes.Buffer
 	w := bufio.NewWriter(&buf)
 
@@ -719,7 +725,7 @@ func GenerateServerInterface(t *template.Template, ops []OperationDefinition) (s
 // Uses the template engine to generate all the wrappers which wrap our simple
 // interface functions and perform marshallin/unmarshalling from HTTP
 // request objects.
-func GenerateWrappers(t *template.Template, ops []OperationDefinition) (string, error) {
+func GenerateWrappers(t *template.Template, ops GenerationParams) (string, error) {
 	var buf bytes.Buffer
 	w := bufio.NewWriter(&buf)
 
@@ -737,7 +743,7 @@ func GenerateWrappers(t *template.Template, ops []OperationDefinition) (string, 
 
 // Uses the template engine to generate the function which registers our wrappers
 // as Echo path handlers.
-func GenerateRegistration(t *template.Template, ops []OperationDefinition) (string, error) {
+func GenerateRegistration(t *template.Template, ops GenerationParams) (string, error) {
 	var buf bytes.Buffer
 	w := bufio.NewWriter(&buf)
 
